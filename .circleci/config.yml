@@ -1,6 +1,8 @@
 version: 2.1
+
 orbs:
   node: circleci/node@5
+
 jobs:
 
   build:
@@ -9,7 +11,7 @@ jobs:
       - checkout
       - run: echo "Building things..."
 
-  unit-tests:
+  unit_tests:
     executor: node/default
     environment:
       JEST_JUNIT_OUTPUT_DIR: ./test-results/
@@ -30,6 +32,7 @@ jobs:
     steps:
       - checkout
       - run: echo "Deploying to development environment..."
+
   deploy_prod:
     executor: node/default
     steps:
@@ -42,6 +45,7 @@ workflows:
   build-test-deploy:
 
     jobs:
+
       - build
 
       - unit_tests:
