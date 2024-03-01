@@ -1,176 +1,68 @@
-# .circleci/config.yml
 version: 2.1
+ 
 orbs:
   node: circleci/node@5
-
+ 
 jobs:
-  # Installation des dépendances
-  install_dependencies:
+ 
+  build:
     executor: node/default
     steps:
       - checkout
-      - run: echo "Installing dependencies"
-      - node/install-packages:
-          pkg-manager: npm
-
-  # Analyse de code
-  code_analysis:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Performing code analysis"
-
-  # Cleaning et Packaging
-  build_package:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Building and packaging"
-
-  # Tests unitaires
+      - run: echo "Building things..."
+ 
   unit_tests:
     executor: node/default
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ./test-results/
     steps:
       - checkout
-      - run: echo "Running unit tests"
-
-  # Tests d'intégration
-  integration_tests:
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm install jest-junit
+      - run:
+          name: Run tests
+          command: npm run test:ci
+      - store_test_results:
+          path: ./test-results/
+ 
+  deploy_dev:
     executor: node/default
     steps:
       - checkout
-      - run: echo "Running integration tests"
-
-  # Tests de régression
-  regression_tests:
+      - run: echo "Deploying to development environment..."
+ 
+  deploy_prod:
     executor: node/default
     steps:
       - checkout
-      - run: echo "Running regression tests"
-
-  # Tests de performance
-  performance_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running performance tests"
-
-  # Tests de sécurité
-  security_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running security tests"
-
-  # Tests de compatibilité
-  compatibility_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running compatibility tests"
-
-  # Tests d'accessibilité
-  accessibility_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running accessibility tests"
-
-  # Préparation de l'environnement de déploiement
-  prepare_deployment:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Preparing for deployment"
-
-  # Déploiement de l'application
-  deploy_app:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Deploying application"
-
-  # Tests de vérification post-déploiement
-  verification_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running verification tests"
-
-  # Tests de validation fonctionnelle
-  functional_validation_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running functional validation tests"
-
-  # Tests de charge
-  load_tests:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Running load tests"
-
-  # Surveillance et suivi
-  monitoring:
-    executor: node/default
-    steps:
-      - checkout
-      - run: echo "Monitoring and tracking"
-
-
+      - run: echo "Deploying to production environment..."
+ 
 workflows:
   version: 2
-  build_test_deploy:
+ 
+  build-test-deploy:
+ 
     jobs:
-      - install_dependencies
-      - code_analysis
-      - build_package
-      - unit_tests
-      - integration_tests
-      - regression_tests
-      - performance_tests
-      - security_tests
-      - compatibility_tests
-      - accessibility_tests
-      - prepare_deployment:
+ 
+      - build
+ 
+      - unit_tests:
+          requires:
+            - build
+ 
+      - deploy_dev:
+          requires:
+            - unit_tests
           filters:
             branches:
               only:
                 - develop
-                - main
-                - /^release\/.*/
-      - deploy_app:
+ 
+      - deploy_prod:
           requires:
-            - prepare_deployment
-          filters:
-            branches:
-              only:
-                - main
-      - verification_tests:
-          requires:
-            - deploy_app
-          filters:
-            branches:
-              only:
-                - main
-      - functional_validation_tests:
-          requires:
-            - deploy_app
-          filters:
-            branches:
-              only:
-                - main
-      - load_tests:
-          requires:
-            - deploy_app
-          filters:
-            branches:
-              only:
-                - main
-      - monitoring:
-          requires:
-            - deploy_app
+            - unit_tests
           filters:
             branches:
               only:
