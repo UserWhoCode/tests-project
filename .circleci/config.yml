@@ -46,6 +46,13 @@ jobs:
       - checkout
       - run: echo "Running compatibility tests"
 
+  # Tests de performance
+  performance_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running performance tests"
+
   # Tests de sécurité
   security_tests:
     executor: node/default
@@ -76,34 +83,76 @@ workflows:
   build-test-deploy:
     jobs:
       - build
-
       - unit_tests:
           requires:
             - build
+          filters:
+            branches:
+             ignore:
+                - /^feature\/.*/
+                - /^hotfix\/.*/
 
       - integration_tests:
           requires:
             - build
+          filters:
+            branches:
+             ignore:
+                - /^feature\/.*/
+                - /^hotfix\/.*/
+
+      - performance_tests:
+          requires:
+            - build
+          filters:
+            branches:
+             ignore:
+                - /^hotfix\/.*/
 
       - regression_tests:
           requires:
             - build
+          filters:
+            branches:
+             ignore:
+                - /^hotfix\/.*/
 
       - accessibility_tests:
           requires:
             - build
+          filters:
+            branches:
+             ignore:
+                - /^feature\/.*/
+                - /^hotfix\/.*/
 
       - compatibility_tests:
           requires:
             - build
+          filters:
+            branches:
+             ignore:
+                - /^feature\/.*/
+                - /^hotfix\/.*/
 
       - security_tests:
           requires:
             - build
+          filters:
+            branches:
+             ignore:
+                - /^feature\/.*/
+                - /^hotfix\/.*/
 
       - deploy_dev:
           requires:
             - security_tests
+            - unit_tests
+            - integration_tests
+            - regression_tests
+            - accessibility_tests
+            - compatibility_tests
+            - performance_tests
           filters:
             branches:
               only:
@@ -112,6 +161,12 @@ workflows:
       - deploy_integration:
           requires:
             - security_tests
+            - unit_tests
+            - integration_tests
+            - regression_tests
+            - accessibility_tests
+            - compatibility_tests
+            - performance_tests
           filters:
             branches:
               only:
@@ -125,7 +180,31 @@ workflows:
             - regression_tests
             - accessibility_tests
             - compatibility_tests
+            - performance_tests
           filters:
             branches:
               only:
                 - main
+
+      - deploy_feature:
+          requires:
+            - regression_tests
+            - performance_tests
+          filters:
+            branches:
+              only:
+                - feature
+
+      - deploy_hotfix:
+          requires:
+            - security_tests
+            - unit_tests
+            - integration_tests
+            - regression_tests
+            - accessibility_tests
+            - compatibility_tests
+            - performance_tests
+          filters:
+             branches:
+              only:
+                - hotfix
