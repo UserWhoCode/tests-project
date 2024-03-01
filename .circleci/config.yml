@@ -98,11 +98,14 @@ jobs:
 workflows:
   version: 2
   build-test-deploy:
+  # On détermine ici les étapes de deploiement (l'ordre, on optimise suivant si on veut tels fichiers ou non)
     jobs:
       - build
       - unit_tests:
+      # le require permet de dire par exmple dans cet exemple qu'il faut que build soit executer avant que unit-tests le soit à son tour
           requires:
             - build
+          # filters permet de filtrer des choses, dans ce cas la les branches feature et hotfix pour de l'optimisation
           filters:
             branches:
              ignore:
@@ -159,6 +162,7 @@ workflows:
             - performance_tests
           filters:
             branches:
+            # only permet de dire selement la branche develop dans ce cas
               only:
                 - develop
 
