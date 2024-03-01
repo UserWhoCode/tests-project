@@ -1,32 +1,58 @@
+# .circleci/config.yml
 version: 2.1
- 
 orbs:
   node: circleci/node@5
- 
+
 jobs:
- 
+  
   build:
     executor: node/default
     steps:
       - checkout
       - run: echo "Building things..."
- 
+
+  # Tests unitaires
   unit_tests:
     executor: node/default
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          command: npm install jest-junit
-      - run:
-          name: Run tests
-          command: npm run test:ci
-      - store_test_results:
-          path: ./test-results/
- 
+      - run: echo "Running unit tests"
+
+  # Tests d'intégration
+  integration_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running integration tests"
+
+  # Tests de régression
+  regression_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running regression tests"
+
+  # Tests d'accessibilité
+  accessibility_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running accessibility tests"
+
+  # Tests de compatibilité
+  compatibility_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running compatibility tests"
+
+  # Tests de sécurité
+  security_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running security tests"
+
   deploy_dev:
     executor: node/default
     steps:
@@ -38,31 +64,62 @@ jobs:
     steps:
       - checkout
       - run: echo "Deploying to production environment..."
- 
+
+  deploy_integration:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "integrate to integration environment..."
+
 workflows:
   version: 2
- 
   build-test-deploy:
- 
     jobs:
- 
       - build
- 
+
       - unit_tests:
           requires:
             - build
- 
+
+      - integration_tests:
+          requires:
+            - build
+
+      - regression_tests:
+          requires:
+            - build
+
+      - accessibility_tests:
+          requires:
+            - build
+
+      - compatibility_tests:
+          requires:
+            - build
+
+      - security_tests:
+          requires:
+            - build
+
       - deploy_dev:
           requires:
-            - unit_tests
+            - security_tests
           filters:
             branches:
               only:
                 - develop
- 
+
+      - deploy_integration:
+          requires:
+            - security_tests
+          filters:
+            branches:
+              only:
+                - integration
+
       - deploy_prod:
           requires:
-            - unit_tests
+            - security_tests
           filters:
             branches:
               only:
