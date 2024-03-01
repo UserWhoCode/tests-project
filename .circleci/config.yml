@@ -205,7 +205,7 @@ workflows:
           filters:
              branches:
               only:
-                - hotfix
+                - feature
 
       - deploy_hotfix:
           requires:
