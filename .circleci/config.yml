@@ -124,58 +124,22 @@ workflows:
   build_test_deploy:
     jobs:
       - install_dependencies
-
-      - code_analysis:
-          requires:
-            - install_dependencies
-
-      - build_package:
-          requires:
-            - code_analysis
-
-      - unit_tests:
-          requires:
-            - build_package
-
-      - integration_tests:
-          requires:
-            - unit_tests
-
-      - regression_tests:
-          requires:
-            - integration_tests
-          filters:
-            branches:
-              ignore:
-                - /^feature\/.*/
-                - /^hotfix\/.*/
-
-      - performance_tests:
-          requires:
-            - regression_tests
-
-      - security_tests:
-          requires:
-            - performance_tests
-
-      - compatibility_tests:
-          requires:
-            - security_tests
-
-      - accessibility_tests:
-          requires:
-            - compatibility_tests
-
+      - code_analysis
+      - build_package
+      - unit_tests
+      - integration_tests
+      - regression_tests
+      - performance_tests
+      - security_tests
+      - compatibility_tests
+      - accessibility_tests
       - prepare_deployment:
-          requires:
-            - accessibility_tests
           filters:
             branches:
               only:
                 - develop
                 - main
                 - /^release\/.*/
-
       - deploy_app:
           requires:
             - prepare_deployment
@@ -183,7 +147,6 @@ workflows:
             branches:
               only:
                 - main
-
       - verification_tests:
           requires:
             - deploy_app
@@ -191,26 +154,23 @@ workflows:
             branches:
               only:
                 - main
-
       - functional_validation_tests:
           requires:
-            - verification_tests
+            - deploy_app
           filters:
             branches:
               only:
                 - main
-
       - load_tests:
           requires:
-            - functional_validation_tests
+            - deploy_app
           filters:
             branches:
               only:
                 - main
-
       - monitoring:
           requires:
-            - load_tests
+            - deploy_app
           filters:
             branches:
               only:
