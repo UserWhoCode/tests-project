@@ -11,79 +11,84 @@ jobs:
       - checkout
       - run: echo "Building things..."
 
-  # Tests unitaires
+  # jobs pour les tests unitaires
   unit_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running unit tests"
 
-  # Tests d'intégration
+  # jobs pour les tests d'intégration
   integration_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running integration tests"
 
-  # Tests de régression
+  # jobs pour les tests de régression
   regression_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running regression tests"
 
-  # Tests d'accessibilité
+  # jobs pour les tests d'accessibilité
   accessibility_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running accessibility tests"
 
-  # Tests de compatibilité
+  # jobs pour les tests de compatibilité
   compatibility_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running compatibility tests"
 
-  # Tests de performance
+  # jobs pour les tests de performance
   performance_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running performance tests"
 
-  # Tests de sécurité
+  # jobs pour les tests de sécurité
   security_tests:
     executor: node/default
     steps:
       - checkout
       - run: echo "Running security tests"
 
+  # jobs pour deploiement developpement
   deploy_dev:
     executor: node/default
     steps:
       - checkout
       - run: echo "Deploying to development environment..."
- 
+
+  # jobs pour deploiement production
   deploy_prod:
     executor: node/default
     steps:
       - checkout
       - run: echo "Deploying to production environment..."
 
+  # jobs pour deploiement d'integration
   deploy_integration:
     executor: node/default
     steps:
       - checkout
       - run: echo "integrate to integration environment..."
 
+  # jobs pour deploiement de fonctionnalité
   deploy_feature:
     executor: node/default
     steps:
       - checkout
       - run: echo "featuring to feature environment..."
-  
+
+  # jobs pour deploiement correctif
   deploy_hotfix:
     executor: node/default
     steps:
@@ -116,18 +121,10 @@ workflows:
       - performance_tests:
           requires:
             - build
-          filters:
-            branches:
-             ignore:
-                - /^hotfix\/.*/
 
       - regression_tests:
           requires:
             - build
-          filters:
-            branches:
-             ignore:
-                - /^hotfix\/.*/
 
       - accessibility_tests:
           requires:
@@ -141,11 +138,6 @@ workflows:
       - compatibility_tests:
           requires:
             - build
-          filters:
-            branches:
-             ignore:
-                - /^feature\/.*/
-                - /^hotfix\/.*/
 
       - security_tests:
           requires:
@@ -209,11 +201,6 @@ workflows:
 
       - deploy_hotfix:
           requires:
-            - security_tests
-            - unit_tests
-            - integration_tests
-            - regression_tests
-            - accessibility_tests
             - compatibility_tests
             - performance_tests
           filters:
