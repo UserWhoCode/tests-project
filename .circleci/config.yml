@@ -88,7 +88,7 @@ jobs:
       - checkout
       - run: echo "featuring to feature environment..."
 
-  # jobs pour deploiement correctif
+  # jobs pour deploiement correctifs
   deploy_hotfix:
     executor: node/default
     steps:
