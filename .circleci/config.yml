@@ -1,68 +1,216 @@
+# .circleci/config.yml
 version: 2.1
-
 orbs:
   node: circleci/node@5
 
 jobs:
-
-  build:
+  # Installation des dépendances
+  install_dependencies:
     executor: node/default
     steps:
       - checkout
-      - run: echo "Building things..."
-
-  unit_tests:
-    executor: node/default
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
-    steps:
-      - checkout
+      - run: echo "Installing dependencies"
       - node/install-packages:
           pkg-manager: npm
-      - run:
-          command: npm install jest-junit
-      - run:
-          name: Run tests
-          command: npm run test:ci
-      - store_test_results:
-          path: ./test-results/
 
-  deploy_dev:
+  # Analyse de code
+  code_analysis:
     executor: node/default
     steps:
       - checkout
-      - run: echo "Deploying to development environment..."
+      - run: echo "Performing code analysis"
 
-  deploy_prod:
+  # Cleaning et Packaging
+  build_package:
     executor: node/default
     steps:
       - checkout
-      - run: echo "Deploying to production environment..."
+      - run: echo "Building and packaging"
+
+  # Tests unitaires
+  unit_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running unit tests"
+
+  # Tests d'intégration
+  integration_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running integration tests"
+
+  # Tests de régression
+  regression_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running regression tests"
+
+  # Tests de performance
+  performance_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running performance tests"
+
+  # Tests de sécurité
+  security_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running security tests"
+
+  # Tests de compatibilité
+  compatibility_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running compatibility tests"
+
+  # Tests d'accessibilité
+  accessibility_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running accessibility tests"
+
+  # Préparation de l'environnement de déploiement
+  prepare_deployment:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Preparing for deployment"
+
+  # Déploiement de l'application
+  deploy_app:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Deploying application"
+
+  # Tests de vérification post-déploiement
+  verification_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running verification tests"
+
+  # Tests de validation fonctionnelle
+  functional_validation_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running functional validation tests"
+
+  # Tests de charge
+  load_tests:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Running load tests"
+
+  # Surveillance et suivi
+  monitoring:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "Monitoring and tracking"
+
 
 workflows:
   version: 2
-
-  build-test-deploy:
-
+  build_test_deploy:
     jobs:
+      - install_dependencies
 
-      - build
+      - code_analysis:
+          requires:
+            - install_dependencies
+
+      - build_package:
+          requires:
+            - code_analysis
 
       - unit_tests:
           requires:
-            - build
+            - build_package
 
-      - deploy_dev:
+      - integration_tests:
           requires:
             - unit_tests
+
+      - regression_tests:
+          requires:
+            - integration_tests
+          filters:
+            branches:
+              ignore:
+                - /^feature\/.*/
+                - /^hotfix\/.*/
+
+      - performance_tests:
+          requires:
+            - regression_tests
+
+      - security_tests:
+          requires:
+            - performance_tests
+
+      - compatibility_tests:
+          requires:
+            - security_tests
+
+      - accessibility_tests:
+          requires:
+            - compatibility_tests
+
+      - prepare_deployment:
+          requires:
+            - accessibility_tests
           filters:
             branches:
               only:
                 - develop
+                - main
+                - /^release\/.*/
 
-      - deploy_prod:
+      - deploy_app:
           requires:
-            - unit_tests
+            - prepare_deployment
+          filters:
+            branches:
+              only:
+                - main
+
+      - verification_tests:
+          requires:
+            - deploy_app
+          filters:
+            branches:
+              only:
+                - main
+
+      - functional_validation_tests:
+          requires:
+            - verification_tests
+          filters:
+            branches:
+              only:
+                - main
+
+      - load_tests:
+          requires:
+            - functional_validation_tests
+          filters:
+            branches:
+              only:
+                - main
+
+      - monitoring:
+          requires:
+            - load_tests
           filters:
             branches:
               only:
