@@ -78,6 +78,18 @@ jobs:
       - checkout
       - run: echo "integrate to integration environment..."
 
+  deploy_feature:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "featuring to feature environment..."
+  
+  deploy_hotfix:
+    executor: node/default
+    steps:
+      - checkout
+      - run: echo "hotfix to hotfix environment..."
+
 workflows:
   version: 2
   build-test-deploy:
